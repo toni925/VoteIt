@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void isConnectionMatch(String userId){
+    private void isConnectionMatch(String userId) {
         DatabaseReference currentUserConnectionDb = usersDb.child(userSex).child(currentUIId).child("connections").child("yeps").child(userId);
         currentUserConnectionDb.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -215,7 +215,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
                 if (dataSnapshot.exists() && !dataSnapshot.child("connections").child("nope").hasChild(currentUIId) && !dataSnapshot.child("connections").child("yeps").hasChild(currentUIId)) {
-                    cards item = new cards(dataSnapshot.getKey(), dataSnapshot.child("name").getValue().toString());
+                    String profileImageUrl = "default";
+                    if(!dataSnapshot.child("profileImageUrl").getValue().equals("default")){
+
+                        profileImageUrl = dataSnapshot.child("profileImageUrl").getValue().toString();
+                    }
+
+                    cards item = new cards(dataSnapshot.getKey(), dataSnapshot.child("name").getValue().toString(), dataSnapshot.child("profileImageUrl").getValue().toString());
                     rowItems.add(item);
                     arrayAdapter.notifyDataSetChanged();
                 }
@@ -251,7 +257,7 @@ public class MainActivity extends AppCompatActivity {
         return;
     }
 
-    public void goToSettings(View view){
+    public void goToSettings(View view) {
         Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
         intent.putExtra("userSex", userSex);
         startActivity(intent);
