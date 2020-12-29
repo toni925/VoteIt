@@ -47,7 +47,7 @@ public class arrayAdapter extends ArrayAdapter<cards> {
                 break;
 
         }
-        Glide.with(getContext()).load(card_item.getProfileImageUrl()).into(image);
+       //Glide.with(getContext()).load(card_item.getProfileImageUrl()).into(image);
 
         return convertView;
     }
