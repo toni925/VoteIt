@@ -54,7 +54,6 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-
         mNameField = (EditText) findViewById(R.id.name);
         mPhoneField = (EditText) findViewById(R.id.phone);
 
@@ -109,7 +108,6 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                     if (map.get("sex") != null) {
                         userSex = map.get("sex").toString();
-
                     }
 
                     Glide.clear(mProfileImage);

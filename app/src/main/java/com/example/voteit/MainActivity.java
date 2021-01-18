@@ -84,6 +84,21 @@ public class MainActivity extends AppCompatActivity {
                 cards obj = (cards) dataObject;
                 String userId = obj.getUserId();
                 usersDb.child(userId).child("connections").child("nope").child(currentUIId).setValue(true);
+
+                usersDb.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        long score = (long) snapshot.child(userId).child("score").getValue();
+                        score--;
+                        usersDb.child(userId).child("score").setValue(score);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
                 Toast.makeText(MainActivity.this, "left", Toast.LENGTH_SHORT).show();
             }
 
@@ -92,6 +107,19 @@ public class MainActivity extends AppCompatActivity {
                 cards obj = (cards) dataObject;
                 String userId = obj.getUserId();
                 usersDb.child(userId).child("connections").child("yeps").child(currentUIId).setValue(true);
+                usersDb.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        long score = (long) snapshot.child(userId).child("score").getValue();
+                        score++;
+                        usersDb.child(userId).child("score").setValue(score);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
                 isConnectionMatch(userId);
                 Toast.makeText(MainActivity.this, "right", Toast.LENGTH_SHORT).show();
             }
@@ -143,44 +171,25 @@ public class MainActivity extends AppCompatActivity {
 
     public void checkUserSex() {
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
         DatabaseReference userDb = usersDb.child(user.getUid());
-        userDb.addChildEventListener(new ChildEventListener() {
+        userDb.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
-                if (dataSnapshot.getKey().equals(user.getUid())) {
-                   if(dataSnapshot.exists()){
-                       if(dataSnapshot.child("sex") != null){
-                           userSex = dataSnapshot.child("sex").getValue().toString();
-
-                           switch (userSex){
-                               case "Male":
-                                   oppositeUserSex = "Female";
-                                   break;
-                               case "Female":
-                                   oppositeUserSex = "Male";
-                                   break;
-                           }
-                           getOppositeSexUsers();
-                       }
-                   }
-
-
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    if (dataSnapshot.child("sex") != null) {
+                        userSex = dataSnapshot.child("sex").getValue().toString();
+                        switch (userSex) {
+                            case "Male":
+                                oppositeUserSex = "Female";
+                                break;
+                            case "Female":
+                                oppositeUserSex = "Male";
+                                break;
+                        }
+                        System.out.println("-------------------------------getOppositeSexUsers()");
+                        getOppositeSexUsers();
+                    }
                 }
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
 
             }
 
@@ -224,17 +233,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getOppositeSexUsers() {
-       usersDb.addChildEventListener(new ChildEventListener() {
+        usersDb.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
+            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
+                System.out.println("-------------onChildAdded started");
                 if (dataSnapshot.exists() && !dataSnapshot.child("connections").child("nope").hasChild(currentUIId) && !dataSnapshot.child("connections").child("yeps").hasChild(currentUIId) && dataSnapshot.child("sex").getValue().toString().equals(oppositeUserSex)) {
                     String profileImageUrl = "default";
-                    if(!dataSnapshot.child("profileImageUrl").getValue().equals("default")){
-
+                    if (!dataSnapshot.child("profileImageUrl").getValue().equals("default")) {
                         profileImageUrl = dataSnapshot.child("profileImageUrl").getValue().toString();
                     }
-
-                    cards item = new cards(dataSnapshot.getKey(), dataSnapshot.child("name").getValue().toString(), profileImageUrl );
+                    cards item = new cards(dataSnapshot.getKey(), dataSnapshot.child("name").getValue().toString(), profileImageUrl);
+                    System.out.println("-----------------cards erstellt");
                     rowItems.add(item);
                     arrayAdapter.notifyDataSetChanged();
                 }
